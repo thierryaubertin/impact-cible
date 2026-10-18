@@ -2,25 +2,35 @@ name: Android CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: set up JDK 11
-      uses: actions/setup-java@v4
-      with:
-        java-version: '11'
-        distribution: 'temurin'
-        cache: gradle
+      - name: Récupérer le projet
+        uses: actions/checkout@v4
 
-    - name: Grant execute permission for gradlew
-      run: chmod +x gradlew
-    - name: Build with Gradle
-      run: ./gradlew build
+      - name: Installer Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Installer Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Compiler l'application
+        run: gradle assembleDebug
+
+      - name: Récupérer le fichier APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: impact-cible-apk
+          path: app/build/outputs/apk/debug/*.apk
